@@ -2,6 +2,8 @@
 /* DBMS name:      Microsoft SQL Server 2008                    */
 /* Created on:     10/29/2021 8:52:32 PM                        */
 /*==============================================================*/
+USE ONLINESHOP
+GO
 
 
 if exists (select 1
