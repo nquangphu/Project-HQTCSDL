@@ -1,104 +1,128 @@
 import AdminView
 from tkinter import *
+from tkinter import messagebox
 
 global loggedInID
-def XemDanhSachDoiTac():
-    conn = AdminView.connectdb("", "")
+def XemDanhSachDoiTac(conn):
     cursor = conn.cursor()
     cursor.execute("select MADT, TENDT, LOAIHANG.TENLH from DOITAC, LOAIHANG where DOITAC.MALH=LOAIHANG.MALH")
     records=cursor.fetchall()
     AdminView.view(["MaDT", "TENDT","LOAIHANG"], records,"Danh sách đối tác")
     conn.commit()
-def XemDanhSachSanPham():
+def XemDanhSachSanPham(conn):
     XemDanhSachSanPham = Tk()
-    XemDanhSachSanPham.title("Điền mã đối tác")
+    XemDanhSachSanPham.title("Chọn đối tác")
+    XemDanhSachSanPham.geometry("300x200")
+    XemDanhSachSanPham['bg'] = '#AC99F2'
+    
+    fr = Frame(XemDanhSachSanPham, border=2)
+    label_madt = Label(fr, text='Điền mã đối tác:')
+    edt_madt = Entry(fr, width=30, bg='#CDE6FF')
 
-    label_madt = Label(XemDanhSachSanPham, text='Điền mã đối tác')
-    edt_madt = Entry(XemDanhSachSanPham, width=50)
+    fr.pack(padx=10, pady=30)
+    label_madt.pack(side=LEFT)
+    edt_madt.pack(side=RIGHT, padx=5)
 
-    label_madt.grid(row=0, column=0, padx=10, pady=10)
-    edt_madt.grid(row=0, column=1, padx=10, pady=10)
+    btnSave = Button(XemDanhSachSanPham, width=10, bg='#F4FF89', text="Duyệt", command=lambda:DanhSachSanPham(edt_madt, conn))
+    btnSave.pack(padx=10, pady=10)
 
-    btnSave = Button(XemDanhSachSanPham, text="Duyêt hợp đồng", command=lambda: DanhSachSanPham(edt_madt))
-    btnSave.grid(row=2, column=1, padx=10, pady=10)
-def DanhSachSanPham(madt):
-    conn = AdminView.connectdb("", "")
+def DanhSachSanPham(madt, conn):
     cursor = conn.cursor()
     cursor.execute("select SANPHAM.MASP, TENSP, GIASP, SLCUNGCAP from SANPHAM, QLSANPHAM where QLSANPHAM.MASP=SANPHAM.MASP AND QLSANPHAM.MADT=?", madt.get())
 
     records = cursor.fetchall()
     AdminView.view(["MASP", "TENSP", "DONGIA", "SOLUONGTONKHO"], records, "Danh sách sản phẩm của đối tác")
     conn.commit()
-def dathang():
+def dathang(conn):
     dathang=Tk()
     dathang.title("Đặt hàng")
+    dathang['bg'] = '#AC99F2'
+    dathang.geometry("600x400")
 
-    label_masp = Label(dathang, text='Điền mã sản phẩm')
-    edt_masp = Entry(dathang, width=50)
+    fr1 = Frame(dathang)
+    label_masp = Label(fr1, text='Điền mã sản phẩm:', width=20)
+    edt_masp = Entry(fr1, width=30, bg='#CDE6FF')
 
-    label_madt = Label(dathang, text='Điền mã đối tác')
-    edt_madt = Entry(dathang, width=50)
+    fr2 = Frame(dathang)
+    label_madt = Label(fr2, text='Điền mã đối tác:', width=20)
+    edt_madt = Entry(fr2, width=30, bg='#CDE6FF')
 
-    label_soluong = Label(dathang, text='Số lượng')
-    edt_soluong = Entry(dathang, width=50)
+    fr3 = Frame(dathang)
+    label_soluong = Label(fr3, text='Số lượng:', width=20)
+    edt_soluong = Entry(fr3, width=30, bg='#CDE6FF')
 
-    label_httt = Label(dathang, text='Hình thức thanh toán')
-    edt_httt = Entry(dathang, width=50)
+    fr4 = Frame(dathang)
+    label_httt = Label(fr4, text='Hình thức thanh toán:', width=20)
+    edt_httt = Entry(fr4, width=30, bg='#CDE6FF')
 
-    label_diachidh = Label(dathang, text='Địa chi giao hàng')
-    edt_diachigh = Entry(dathang, width=50)
+    fr5 = Frame(dathang)
+    label_diachidh = Label(fr5, text='Địa chi giao hàng:', width=20)
+    edt_diachigh = Entry(fr5, width=30, bg='#CDE6FF')
 
-    label_masp.grid(row=0, column=0, padx=10, pady=10)
-    edt_masp.grid(row=0, column=1, padx=10, pady=10)
+    fr1.pack(padx=10, pady=10)
+    fr2.pack(padx=10, pady=10)
+    fr3.pack(padx=10, pady=10)
+    fr4.pack(padx=10, pady=10)
+    fr5.pack(padx=10, pady=10)
 
-    label_madt.grid(row=1, column=0, padx=10, pady=10)
-    edt_madt.grid(row=1, column=1, padx=10, pady=10)
+    label_masp.pack(side=LEFT, padx=5)
+    edt_masp.pack(side=RIGHT)
 
-    label_soluong.grid(row=2, column=0, padx=10, pady=10)
-    edt_soluong.grid(row=2, column=1, padx=10, pady=10)
+    label_madt.pack(side=LEFT, padx=5)
+    edt_madt.pack(side=RIGHT)
 
-    label_httt.grid(row=3, column=0, padx=10, pady=10)
-    edt_httt.grid(row=3, column=1, padx=10, pady=10)
+    label_soluong.pack(side=LEFT, padx=5)
+    edt_soluong.pack(side=RIGHT)
 
-    label_diachidh.grid(row=4, column=0, padx=10, pady=10)
-    edt_diachigh.grid(row=4, column=1, padx=10, pady=10)
+    label_httt.pack(side=LEFT, padx=5)
+    edt_httt.pack(side=RIGHT)
 
-    btnSave = Button(dathang, text="Đặt hàng",
-                     command=lambda: dathangDB(edt_masp,edt_madt,edt_soluong,edt_httt,edt_diachigh))
-    btnSave.grid(row=5, column=1, padx=10, pady=10)
+    label_diachidh.pack(side=LEFT, padx=5)
+    edt_diachigh.pack(side=RIGHT)
 
-def dathangDB(masp, madt, soluong, httt, diachigh):
-    conn = AdminView.connectdb("", "")
+    btnSave = Button(dathang, text="Đặt hàng", width=15, bg='#F4FF89',
+                     command=lambda:dathangDB(edt_masp,edt_madt,edt_soluong,edt_httt,edt_diachigh, conn))
+    btnSave.pack(pady=20)
+
+def dathangDB(masp, madt, soluong, httt, diachigh, conn):
+    #conn = AdminView.connectdb("", "")
     cursor = conn.cursor()
     cursor.execute("Exec DATHANG ?, ?, ?, ?, ?, ?, ?",
                    loggedInID, masp.get(), madt.get(), soluong.get(), httt.get(), diachigh.get(), '10000')
     conn.commit()
-def XemDanhsachDonHang():
-    conn = AdminView.connectdb("", "")
+
+def XemDanhsachDonHang(conn):
+    #conn = AdminView.connectdb("", "")
     cursor = conn.cursor()
     cursor.execute("select MADH, NGAYTAO, DIACHIGH, TONGTIEN FROM DONHANG WHERE MAKH=?", loggedInID)
 
     records = cursor.fetchall()
     AdminView.view(["MADH", "NGAYTAO", "DIACHIGH", "TONGTIEN"], records, "Danh sách đơn hàng")
     conn.commit()
-def khachhangView():
+
+
+def khachhangView(conn):
     khachhang = Tk()
     khachhang['bg'] = '#AC99F2'
-    khachhang.title("Chức năng cho đối tác")
-    khachhang.geometry("600x600")
+    khachhang.title("Chức năng khách hàng")
+    khachhang.geometry("600x400")
 
+    fr1 = Frame(khachhang, bg='#AC99F2')
+    btnXemDanhSachDoiTac = Button(fr1, text="Xem DS đối tác", width=30, height=3, border=2, bg='#FDFFB2', font='Time 11',
+                    command=lambda:XemDanhSachDoiTac(conn))
+    btnXemDanhSachSanPham= Button(fr1, text="Xem DS sản phẩm", width=30, height=3, border=2, bg='#FDFFB2', font='Time 11',
+                    command=lambda:XemDanhSachSanPham(conn))
+    
+    fr2 = Frame(khachhang, bg='#AC99F2')
+    btnDathang = Button(fr2, text="Đặt hàng", width=30, height=3, border=2, bg='#FDFFB2', font='Time 11',
+                    command=lambda:dathang(conn))
+    btnXemDanhSachDonHang = Button(fr2, text="Xem DS đơn hàng", width=30, height=3, border=2, bg='#FDFFB2', font='Time 11',
+                    command=lambda:XemDanhsachDonHang(conn))
 
-    btnXemDanhSachDoiTac = Button(khachhang, text="Xem danh sách đối tác", width=30, font='Time 10', border=5, padx=10,
-                          pady=20,
-                          command=XemDanhSachDoiTac)
-    btnXemDanhSachSanPham= Button(khachhang, text="Xem sản phẩm", width=30, font='Time 10', border=5, padx=10,
-                          pady=20, command=XemDanhSachSanPham)
-    btnDathang = Button(khachhang, text="Đặt hàng", width=30, font='Time 10', border=5, padx=10,
-                        pady=20,
-                        command=dathang)
-    btnXemDanhSachDonHang = Button(khachhang, text="Xem danh sách đơn hàng", width=30, font='Time 10', border=5, padx=10,
-                        pady=20,command=XemDanhsachDonHang)
-    btnXemDanhSachDoiTac.grid(row=0, column=0, padx=10, pady=10)
-    btnXemDanhSachSanPham.grid(row=0, column=1, padx=10, pady=10)
-    btnDathang.grid(row=1, column=0, padx=10, pady=10)
-    btnXemDanhSachDonHang.grid(row=1, column=1, padx=10, pady=10)
+    fr1.pack(padx=10,pady=20)
+    fr2.pack(padx=10,pady=20)
+
+    btnXemDanhSachDoiTac.pack(side=LEFT, padx=10)
+    btnXemDanhSachSanPham.pack(side=RIGHT, padx=10)
+    btnDathang.pack(side=LEFT, padx=10)
+    btnXemDanhSachDonHang.pack(side=RIGHT, padx=10)

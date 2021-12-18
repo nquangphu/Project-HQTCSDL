@@ -1,12 +1,13 @@
 from tkinter import *
+from tkinter import font
 import AdminView
 import DoitacView
-import KhachhangView
+import KhachHangView
 import TaixeView
+from tkinter import messagebox
 
-def Login(username, password):
-
-    conn=AdminView.connectdb("","")
+def Login(username, password, conn):
+    #conn=AdminView.connectdb("DESKTOP-EC6UGJB","ONLINESHOP")
     cursor = conn.cursor()
 
     cursor.execute('select * from ONLINESHOP.dbo.TAIKHOAN where ISSUPERUSER=1 and USERNAME=? and PASS=?'
@@ -25,36 +26,54 @@ def Login(username, password):
                           , username.get(), password.get())
     taixe=cursor.fetchall()
 
-
+    success = 0
     if (len(admin)>0):
-         AdminView.AdminView()
+        success = 1
+        AdminView.AdminView(conn)
     if (len(doitac)>0):
+        success = 1
         DoitacView.loggedInID=doitac[0][0]
-        DoitacView.doitacView()
+        DoitacView.doitacView(conn)
     if (len(khachhang)>0):
-        KhachhangView.loggedInID=khachhang[0][0]
-        KhachhangView.khachhangView()
+        success = 1
+        KhachHangView.loggedInID=khachhang[0][0]
+        KhachHangView.khachhangView(conn)
     if (len(taixe)>0):
+        success = 1
         TaixeView.loggedInID=taixe[0][0]
-        TaixeView.taixeView()
+        TaixeView.taixeView(conn)
+    if (success == 0):
+        messagebox.showinfo("Thông báo", "Sai thông tin đăng nhập!")
 
 
+def LoginView(conn):
+    root= Tk()
+    root.title("Đăng nhập")
+    root.geometry("400x300")
+    root['bg'] = '#AC99F2'
 
-root= Tk()
-root.title("Hello user")
+    label_login = Label(root, text=" Thông tin tài khoản ", font=20, pady = 10, bg='white')
+    label_login.pack(side=TOP, pady=10)
 
-label_username = Label(root, text='Username')
-edt_username = Entry(root, width=50)
+    user_frame = Frame(root, border=2)
+    label_username = Label(user_frame, text='Username :', underline=0)
+    edt_username = Entry(user_frame, width=40, bg='#FDFCD9')
+    user_frame.pack(padx=10, pady=10)
+    label_username.pack(side=LEFT)
+    edt_username.pack(side=RIGHT)
 
-label_password = Label(root, text='Password')
-edt_password = Entry(root, width=50)
+    pass_frame = Frame(root, border=2)
+    label_password = Label(pass_frame, text='Password  :', underline=0)
+    edt_password = Entry(pass_frame, width=40, show="*", bg='#FDFCD9')
+    pass_frame.pack(padx=10, pady=10)
+    label_password.pack(side=LEFT)
+    edt_password.pack(side=RIGHT)
 
-label_username.grid(row=0, column=0, padx=10, pady=10)
-edt_username.grid(row=0, column=1, padx=10, pady=10)
-
-label_password.grid(row=1, column=0, padx=10, pady=10)
-edt_password.grid(row=1, column=1, padx=10, pady=10)
-
-btnSave = Button(root, text="Login", command=lambda :Login(edt_username,edt_password))
-btnSave.grid(row=2, column=1, padx=10, pady=10)
-root.mainloop()
+    btn_frame = Frame(root, bg='#AC99F2')
+    btnSave = Button(btn_frame, text="Đăng nhập", width=10, bg='#3D50FF', fg='white', underline=0)
+    btnSave['command']=lambda :Login(edt_username,edt_password, conn)
+    btnExit = Button(btn_frame, text="Thoát", width=10, bg='#D81E3D', fg='white', underline=0, command=root.destroy)
+    btnSave.pack(side=LEFT, padx=20)
+    btnExit.pack(side=RIGHT, padx=20)
+    btn_frame.pack(pady=40)
+    root.mainloop()

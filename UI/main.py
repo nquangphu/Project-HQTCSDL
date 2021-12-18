@@ -1,34 +1,43 @@
-# This is a sample Python script.
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 from tkinter import *
-import DoitacView, AdminView
+from tkinter import messagebox
+import tkinter
+import Login
+import pyodbc as pyodbc
+import time
 
+global conn
 
-# Press the green button in the gutter to run the script.
+def connectdb():
+    start = time.time()
+    conn = pyodbc.connect('Driver={SQL Server};'
+                  'Server=%s;'
+                  'Database=ONLINESHOP;'
+                  'Trusted_Connection=yes;'% (edt_servername.get()))
+    end = time.time()
+    if (end - start < 3000):
+        Login.LoginView(conn)
+    else:
+        messagebox.showinfo("Thông báo", "Kết nối thất bại!")
 
+windb = Tk()
+windb.title("Kết nối máy chủ")
+windb.geometry("350x150")
+windb['bg'] = '#AC99F2'
 
-root= Tk()
-root.title("Hello user")
-root.geometry("800x800")
+db_frame = Frame(windb)
+label_servername = Label(db_frame, text='Server Name :', underline=0)
+edt_servername = Entry(db_frame, width=40, bg='#FDFCD9')
+db_frame.pack(padx=20, pady=40)
+label_servername.pack(side=LEFT)
+edt_servername.pack(side=RIGHT)
 
-w = Scrollbar(root)
-w.pack(side=RIGHT, fill=Y)
+btndb_frame = Frame(windb, bg='#AC99F2')
+btnConn = Button(btndb_frame, text="Kết nối", width=10, bg='#3D50FF', fg='white', underline=0)
+btnConn['command']=lambda:connectdb()
 
-btnKhachhang=Button(root, text="Khách hàng",width=100, font='Time 20 bold',border=10, padx=20, pady=40, command=DoitacView.doitacView)
-btnKhachhang.pack(pady=10)
+btnQuit = Button(btndb_frame, text="Thoát", width=10, bg='#D81E3D', fg='white', underline=0, command=windb.destroy)
+btndb_frame.pack()
+btnConn.pack(side=LEFT, padx=20)
+btnQuit.pack(side=RIGHT, padx=20)
 
-btnTaixe=Button(root, text="Tài xế",width=100, font='Time 20 bold',border=10, padx=20, pady=40, command=DoitacView.doitacView)
-btnTaixe.pack(pady=10)
-
-btnDoitac=Button(root, text="Đối tác",width=100, font='Time 20 bold',border=10, padx=20, pady=40, command=DoitacView.doitacView)
-btnDoitac.pack(pady=10)
-
-btnAdmin=Button(root, text="Quản trị",width=100, font='Time 20 bold',border=10, padx=20, pady=40, command=AdminView.AdminView)
-btnAdmin.pack(pady=10)
-
-
-root.mainloop()
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+windb.mainloop()
