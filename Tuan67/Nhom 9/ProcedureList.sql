@@ -120,7 +120,7 @@ BEGIN TRAN
 COMMIT TRAN
 -- proc đặt hàng
 GO
-alter PROC DATHANG
+CREATE PROC DATHANG
 	@MAKH BIGINT,
 	@MASP BIGINT,
 	@MADT BIGINT,
@@ -140,7 +140,7 @@ BEGIN TRAN
 	                     @MADT = @MADT,                        -- bigint
 	                     @MATX = NULL,                        -- bigint
 	                     @HINHTHUCTT = @HINHTHUCTT,                 -- varchar(20)
-	                     @NGAYTAO = '2021-11-21 13:20:04', -- datetime
+	                     @NGAYTAO = GetDate, -- datetime
 	                     @DIACHIGH = @DIACHIGH,                   -- varchar(100)
 	                     @PHISP =@PHISP,                    -- decimal(15, 2)
 	                     @PHISHIP = @PHISHIP,                  -- decimal(15, 2)
@@ -521,26 +521,8 @@ GO
 CREATE PROC DUYET_HOPDONG
 	@MADT BIGINT
 AS
-BEGIN TRAN 
-	DECLARE @MyTableVar table(  
-    MAHD BIGINT NOT NULL,  
-    MADT BIGINT,  
-    EXPRIEDTIME DATE,  
-    ACCEPTEDDATE DATETIME);  
-	
-	UPDATE dbo.HOPDONG  
-	SET ISACEPTED=1
-	OUTPUT INSERTED.MAHD,
-			INSERTED.MADT,
-			INSERTED.TGKT,
-			GETDATE() 
-	INTO @MyTableVar
-	 WHERE MADT=@MADT AND ISACEPTED=0
+	UPDATE dbo.HOPDONG  SET ISACEPTED=1 WHERE MADT=@MADT
 
-	--Display the result set of the table variable.  
-	SELECT *  
-	FROM @MyTableVar;  
-COMMIT TRAN
 -- XEM DANH SÁCH TÀI KHOẢN
 GO 
 CREATE PROC XEM_DS_TK
