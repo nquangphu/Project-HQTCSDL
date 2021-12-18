@@ -1,12 +1,18 @@
 from tkinter import *
 from  tkinter import ttk
-import pyodbc as pyodbc
 
 #======================= connect database =======================
+import pyodbc as pyodbc
+
+def view(fields,records,title):
+    win=Tk()
+    win.title(title)
+    table=create_table(fields,win, records)
+    table.pack()
 
 def connectdb(server, dbname):
     conn = pyodbc.connect('Driver={SQL Server};'
-                  'Server=DESKTOP-EC6UGJB;'
+                  'Server=DESKTOP-G9QD9GB\MYSQLSERVER;'
                   'Database=ONLINESHOP;'
                   'Trusted_Connection=yes;')
     return conn
@@ -46,10 +52,9 @@ def create_table(fields, tk, records):
         l = []
         for j in record:
             l.append(j)
-        table.insert(parent='', index='end', iid=i, text='',values=l)
-        i=i+1
+        table.insert(parent='', index='end', iid=i, text='', values=l)
+        i = i + 1
     return table
-
 def AdminView():
 
     admin=Tk()
@@ -57,10 +62,10 @@ def AdminView():
     admin.title("Chức năng cho Quản trị")
     admin.geometry("600x600")
     btnDSTK=Button(admin, text="Xem danh sách tài khoản",width=30, font='Time 10', border=5, padx=10, pady=20, command=danhsachtaikhoan)
-    btnDSHDChuaDuyet = Button(admin, text="Gia hạn hợp đồng", font='Time 10',width=30, border=5, padx=10, pady=20, command=dshopdongchuaduyet)
+    btnDSHDChuaDuyet = Button(admin, text="Xem danh sách hợp đồng chưa duyệt", font='Time 10',width=30, border=5, padx=10, pady=20, command=xemdshopdongchuaduyet)
 
-    btnDSHDDaDuyet= Button(admin, text="Thêm sản phẩm", font='Time 10', border=5,width=30, padx=10, pady=20,command=dshopdongdaduyet)
-    btnDuyetHD=Button(admin, text="Sửa sản phẩm", font='Time 10', border=5, padx=10,width=30, pady=20, command=duyethopdong)
+    btnDSHDDaDuyet= Button(admin, text="Xem danh sách hợp đồng đã duyệt", font='Time 10', border=5,width=30, padx=10, pady=20,command=xemdshopdongdaduyet)
+    btnDuyetHD=Button(admin, text="Duyệt hợp đồng", font='Time 10', border=5, padx=10,width=30, pady=20, command=duyethopdong)
     btnCapNhatTK = Button(admin, text="Cập nhật tài khoản", font='Time 10',width=30, border=5,
                                    padx=10, pady=20, command=capnhattaikhoan)
     btnThongBaoGH = Button(admin, text="Thông báo gia hạn", font='Time 10',width=30, border=5,
@@ -73,65 +78,152 @@ def AdminView():
     btnCapNhatTK.grid(row=2, column=0, padx=10, pady=10)
     btnThongBaoGH.grid(row=2, column=1, padx=10, pady=10)
 def danhsachtaikhoan():
-    # danhsachtaikhoan=Tk()
-    # danhsachtaikhoan.title("Danh sách tài khoản")
-    #
-    # dstkTable=create_table(["ID","Useranme","Password","Staff","Admin","phone","email","Address"], danhsachtaikhoan)
-    # # add data
-    # dstkTable.insert(parent='', index='end', iid=0, text='',
-    #                values=('Tom', 'phuc@gmail.com', '123456','Quảng ngãi'))
-    # dstkTable.insert(parent='', index='end', iid=1, text='',
-    #                values=('Aandrew', 'phuc@gmail.com', '123456','Quảng ngãi'))
-    # dstkTable.insert(parent='', index='end', iid=2, text='',
-    #                values=('Anglina', 'phuc@gmail.com', '123456','Quảng ngãi'))
-    # dstkTable.insert(parent='', index='end', iid=3, text='',
-    #                values=('Shang-Chi', 'phuc@gmail.com', '123456','Quảng ngãi'))
-    # dstkTable.pack()
-    conn = connectdb("", "dbname")
+    conn=connectdb("","")
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM ONLINESHOP.dbo.TAIKHOAN')
+    cursor.execute('Exec XEM_DS_TK')
     records = cursor.fetchall()
-    print(records)
     view(("ID","Username","Password","Staff","Admin","Phone","Email","Address","State"),records,"Danh sách tài khoản")
 
+def xemdshopdongchuaduyet():
+    xemdshopdongchuaduyet=Tk()
+    xemdshopdongchuaduyet.title("Danh sách hợp đồng chưa duyệt")
 
-def dshopdongchuaduyet():
-    dshopdongchuaduyet=Tk()
-    dshopdongchuaduyet.title("Danh sách hợp đồng chưa duyệt")
-    dshdcdTable=create_table(["ID", "DoiTac", "SLChiNhanh", "StartTime", "EndTime","Tips","Status"], dshopdongchuaduyet)
-    # add data
-    dshdcdTable.insert(parent='', index='end', iid=0, text='',
-                     values=('1', '1', '10', '20-12-2020', '20-1-2023', "10%", "Accepted"))
-    dshdcdTable.insert(parent='', index='end', iid=1, text='',
-                     values=('1', '1', '10', '20-12-2020', '20-1-2023', "10%", "Accepted"))
-    dshdcdTable.insert(parent='', index='end', iid=2, text='',
-                     values=('1', '1', '10', '20-12-2020', '20-1-2023', "10%", "Accepted"))
-    dshdcdTable.insert(parent='', index='end', iid=3, text='',
-                     values=('1', '1', '10', '20-12-2020', '20-1-2023', "10%", "Accepted"))
-    dshdcdTable.pack()
-def dshopdongdaduyet():
-    dshopdongdaduyet = Tk()
-    dshopdongdaduyet.title("Danh sách hợp đồng đã duyệt")
+    label_madt = Label(xemdshopdongchuaduyet, text='Điền mã đối tác')
+    edt_madt = Entry(xemdshopdongchuaduyet, width=50)
 
-    dshdddTable = create_table(["ID", "DoiTac", "SLChiNhanh", "StartTime", "EndTime", "Tips", "Status"],
-                               dshopdongdaduyet)
-    # add data
-    lst=('1', '1', '10', '20-12-2020', '20-1-2023', "10%", "Accepted")
-    dshdddTable.insert(parent='', index='end', iid=0, text='',
-                       values=lst)
+    label_madt.grid(row=0, column=0, padx=10, pady=10)
+    edt_madt.grid(row=0, column=1, padx=10, pady=10)
 
-    dshdddTable.pack()
-def view(fields,records,title):
-    win=Tk()
-    win.title(title)
-    table=create_table(fields,win, records)
-    table.pack()
+    btnSave = Button(xemdshopdongchuaduyet, text="Xem", command=lambda :dshopdongchuaduyet(edt_madt))
+    btnSave.grid(row=2, column=1, padx=10, pady=10)
+def dshopdongchuaduyet(entry):
+    conn = connectdb("", "")
+    cursor = conn.cursor()
+    cursor.execute("EXEC XEM_DSHD_CHUADUYET @MADT=?",entry.get())
+    records = cursor.fetchall()
+    view(("ID", "DoiTac", "SLChiNhanh", "StartTime", "EndTime","Tips","Status"), records, "Danh sách hợp đồng đã duyệt")
+
+def xemdshopdongdaduyet():
+    xemdshopdongchuaduyet=Tk()
+    xemdshopdongchuaduyet.title("Danh sách hợp đồng đã duyệt")
+
+    label_madt = Label(xemdshopdongchuaduyet, text='Điền mã đối tác')
+    edt_madt = Entry(xemdshopdongchuaduyet, width=50)
+
+    label_madt.grid(row=0, column=0, padx=10, pady=10)
+    edt_madt.grid(row=0, column=1, padx=10, pady=10)
+
+    btnSave = Button(xemdshopdongchuaduyet, text="Xem", command=lambda :dshopdongdaduyet(edt_madt))
+    btnSave.grid(row=2, column=1, padx=10, pady=10)
+def dshopdongdaduyet(entry):
+    conn = connectdb("", "")
+    cursor = conn.cursor()
+    cursor.execute("EXEC XEM_DSHD_DADUYET @MADT=?",entry.get())
+    records = cursor.fetchall()
+    print(records)
+    view(("ID", "DoiTac", "SLChiNhanh", "StartTime", "EndTime","Tips","Status"), records, "Danh sách hợp đồng đã duyệt")
+
 def duyethopdong():
     duyethopdong=Tk()
     duyethopdong.title("Duyệt hợp đồng")
+
+    label_madt = Label(duyethopdong, text='Điền mã đối tác cần xét duyệt')
+    edt_madt = Entry(duyethopdong, width=50)
+
+    label_madt.grid(row=0, column=0, padx=10, pady=10)
+    edt_madt.grid(row=0, column=1, padx=10, pady=10)
+
+    btnSave = Button(duyethopdong, text="Duyêt hợp đồng", command=lambda :duyet(edt_madt,duyethopdong))
+    btnSave.grid(row=2, column=1, padx=10, pady=10)
+
+def duyet(entry,view):
+
+    conn = connectdb("", "")
+    cursor = conn.cursor()
+    cursor.execute("EXEC DUYET_HOPDONG @MADT=?", entry.get())
+    conn.commit()
+    view.destroy()
+
 def capnhattaikhoan():
     capnhattaikhoan=Tk()
     capnhattaikhoan.title("Cập nhật tài khoản")
+
+    label_matk = Label(capnhattaikhoan, text='Điền mã tài khoản cần sửa')
+    edt_matk = Entry(capnhattaikhoan, width=50)
+
+    label_username = Label(capnhattaikhoan, text='Username mới')
+    edt_username = Entry(capnhattaikhoan, width=50)
+
+    label_password = Label(capnhattaikhoan, text='Mật khẩu mới')
+    edt_password = Entry(capnhattaikhoan, width=50)
+
+    label_isStaff = Label(capnhattaikhoan, text='Có là nhân viên không (0/1)')
+    edt_isStaff = Entry(capnhattaikhoan, width=50)
+
+    label_isAdmin = Label(capnhattaikhoan, text='Có là quản trị không (0/1)')
+    edt_isAdmin= Entry(capnhattaikhoan, width=50)
+
+    label_phone = Label(capnhattaikhoan, text='Số điện thoại mới')
+    edt_phone = Entry(capnhattaikhoan, width=50)
+
+    label_email = Label(capnhattaikhoan, text='Email mới')
+    edt_email = Entry(capnhattaikhoan, width=50)
+
+    label_address = Label(capnhattaikhoan, text='Địa chỉ mới')
+    edt_address = Entry(capnhattaikhoan, width=50)
+
+    label_matk.grid(row=0, column=0, padx=10, pady=10)
+    edt_matk.grid(row=0, column=1, padx=10, pady=10)
+
+    label_username.grid(row=1, column=0, padx=10, pady=10)
+    edt_username.grid(row=1, column=1, padx=10, pady=10)
+
+    label_password.grid(row=2, column=0, padx=10, pady=10)
+    edt_password.grid(row=2, column=1, padx=10, pady=10)
+
+    label_isStaff.grid(row=3, column=0, padx=10, pady=10)
+    edt_isStaff.grid(row=3, column=1, padx=10, pady=10)
+
+    label_isAdmin.grid(row=4, column=0, padx=10, pady=10)
+    edt_isAdmin.grid(row=4, column=1, padx=10, pady=10)
+
+    label_phone.grid(row=5, column=0, padx=10, pady=10)
+    edt_phone.grid(row=5, column=1, padx=10, pady=10)
+
+    label_email.grid(row=6, column=0, padx=10, pady=10)
+    edt_email.grid(row=6, column=1, padx=10, pady=10)
+
+    label_address.grid(row=7, column=0, padx=10, pady=10)
+    edt_address.grid(row=7, column=1, padx=10, pady=10)
+
+    btnSave = Button(capnhattaikhoan, text="Cập nhật tài khoản",
+                     command=lambda :capnhattaikhoanDB(capnhattaikhoan,edt_matk,edt_username,edt_password,edt_isStaff,edt_isAdmin,edt_phone,edt_email,edt_address))
+    btnSave.grid(row=8, column=1, padx=10, pady=10)
+def capnhattaikhoanDB(view, matk, username, password, isStaff, isAdmin, phone, email, address):
+
+    conn = connectdb("", "")
+    cursor = conn.cursor()
+    print(matk.get(),username.get(),password.get(),isStaff.get(),isAdmin.get(),phone.get(),email.get(),address.get())
+    cursor.execute('Exec CAPNHAT_TAIKHOAN @MATK=?, @USERNAME=?, @PASS=?, @ISSTAFF=?, @ISSUPPERUSER=?, @SDT=?, @EMAIL=?, @DIACHI=?',
+                   matk.get(),username.get(),password.get(),isStaff.get(),isAdmin.get(),phone.get(),email.get(),address.get())
+    conn.commit()
+    view.destroy()
+
 def thongbaogiahan():
     thongbaogiahan=Tk()
-    thongbaogiahan.title("Thông báo gia hạn")
+    thongbaogiahan.title("Mã đối tác")
+
+    label_madt = Label(thongbaogiahan, text='Điền mã đối tác')
+    edt_madt = Entry(thongbaogiahan, width=50)
+
+    label_madt.grid(row=0, column=0, padx=10, pady=10)
+    edt_madt.grid(row=0, column=1, padx=10, pady=10)
+
+    btnSave = Button(thongbaogiahan, text="Xem", command=lambda: thongbaogiahanDB(edt_madt))
+    btnSave.grid(row=2, column=1, padx=10, pady=10)
+def thongbaogiahanDB(madt):
+    conn = connectdb("", "")
+    cursor = conn.cursor()
+    cursor.execute('Exec THONGBAO_GIAHAN @MADT=?',madt.get())
+    records = cursor.fetchall()
+    view(["ID", "DoiTac", "SLChiNhanh", "StartTime", "EndTime", "Tips", "Status"],records,"Thông báo gia hạn")

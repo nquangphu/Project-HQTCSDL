@@ -120,7 +120,7 @@ BEGIN TRAN
 COMMIT TRAN
 -- proc đặt hàng
 GO
-CREATE PROC DATHANG
+alter PROC DATHANG
 	@MAKH BIGINT,
 	@MASP BIGINT,
 	@MADT BIGINT,
@@ -150,18 +150,20 @@ BEGIN TRAN
 	                     @MADH = @MADH1 OUTPUT             -- bigint
 	DECLARE @SLSPCC AS INT
 	SELECT @SLSPCC= SLCUNGCAP FROM dbo.QLSANPHAM WHERE MADT=@MADT AND MASP=@MASP
+	print (@SLSP)
+	print(@SLSPCC)
 	IF (@SLSP>@SLSPCC)
-		BEGIN
-		    RAISERROR('số lượng sp không đủ',15,1)
-			ROLLBACK
-		END
-	EXEC dbo.THEMSANPHAM @MADH = @MADH1,     -- bigint
-	                    @MASP = @MASP,     -- bigint
-	                    @GIASP = @GIASP, -- decimal(15, 2)
-	                    @SLSP = @SLSP,      -- int
-						@MADT=@MADT
-COMMIT
-	
+		 rollback tran
+	ELSE
+		begin
+			EXEC dbo.THEMSANPHAM @MADH = @MADH1,     -- bigint
+								@MASP = @MASP,     -- bigint
+								@GIASP = @GIASP, -- decimal(15, 2)
+								@SLSP = @SLSP,      -- int
+								@MADT=@MADT
+			COMMIT tran
+		end
+
 GO
 -- proc xác nhận đơn hàng
 CREATE PROC XACNHAN_DONHANG
@@ -204,7 +206,7 @@ BEGIN TRAN
 			@MATK OUTPUT;
 		INSERT INTO dbo.TAIXE
 		(
-		    MATK,
+		    MATK,G
 		    MAKV,
 		    CMND,
 		    DIACHI,
@@ -232,7 +234,6 @@ AS
 	WHERE dbo.DOITAC.MAKV=dbo.TAIXE.MAKV
 	AND dbo.TAIXE.MATX=@MATX
 	AND dbo.DONHANG.MADT=dbo.DOITAC.MADT
-	AND dbo.DONHANG.TRANGTHAITTOAN=1
 	AND dbo.DONHANG.MATX IS NULL
 GO
 -- proc nhận đơn hàng
@@ -240,7 +241,14 @@ CREATE PROC NHAN_DONHANG
 	@MADH BIGINT,
 	@MATX BIGINT
 AS
-	UPDATE dbo.DONHANG SET MATX=@MATX WHERE MADH=@MADH
+	BEGIN TRAN
+		IF NOT EXISTS (SELECT * FROM DONHANG WHERE MATX IS NULL AND MADH=@MADH)
+			ROLLBACK
+		ELSE 
+		BEGIN
+			UPDATE dbo.DONHANG SET MATX=@MATX WHERE MADH=@MADH
+			COMMIT TRAN
+		END
 GO
 -- proc tài xế cập nhật đơn hàng
 CREATE PROC CAPNHAT_DONHANG_TX

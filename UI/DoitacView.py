@@ -1,32 +1,59 @@
 from tkinter import *
-from tksheet import Sheet
+import AdminView
+global loggedInID
 
-def danhsachdonhang(xemdanhsachdonhang):
-    danhsachdonhang=Toplevel(xemdanhsachdonhang)
-    xemdanhsachdonhang.withdraw()
-    danhsachdonhang.title("Danh sách đơn hàng")
-    frame= Frame(danhsachdonhang)
+def danhsachdonhang():
+    conn = AdminView.connectdb("", "")
+    cursor = conn.cursor()
+    cursor.execute("EXEC XEM_DS_DONHANG_DT @MADT=?",loggedInID)
+    records = cursor.fetchall()
+    AdminView.view(("ID", "MAKH", "MADT", "MATX", "HINHTHUCTT","NGAYTAO","DIACHIGH",
+                    "PHISP", "PHISHIP","TONGTIEN","TRANGTHAISHP","TRANGTHAITT"), records, "Danh sách đơn hàng")
+def danhsachchinhanh():
+    conn = AdminView.connectdb("", "")
+    cursor = conn.cursor()
+    cursor.execute("select HOPDONG.MAHD, CHINHANH.MACN, CHINHANH.DIACHI  from CHINHANH, HOPDONG where HOPDONG.MADT=? AND HOPDONG.MAHD=CHINHANH.MAHD"
+                   , loggedInID)
+    records = cursor.fetchall()
+    AdminView.view(("MAHD", "MACN", "DIAHCI"), records, "Danh sách chi nhánh")
+def danhsachhopdong():
+    conn = AdminView.connectdb("", "")
+    cursor = conn.cursor()
+    cursor.execute("Select * from ONLINESHOP.dbo.HOPDONG where MADT=?", loggedInID)
+    records = cursor.fetchall()
+    AdminView.view(("ID", "DoiTac", "SLChiNhanh", "StartTime", "EndTime", "Tips", "Status"), records,
+         "Danh sách hợp đồng của quý đối tác")
+def dkhopdong():
+    dkhopdong=Tk()
+    dkhopdong.title("Đăng kí hợp đồng")
 
-    sheet = Sheet(frame)
-    sheet.enable_bindings()
-    frame.grid(row=0, column=0, sticky="nswe")
-    sheet.grid(row=0, column=0, sticky="nswe")
-    sheet.set_sheet_data([[1,2,3],[4,5,6]])
+    label_TGBD = Label(dkhopdong, text='Thời gian bắt đầu của hợp đồng')
+    edt_TGBD = Entry(dkhopdong, width=50)
 
-    danhsachdonhang.protocol("WM_DELETE_WINDOW", danhsachdonhang.destroy)
+    label_TGKT = Label(dkhopdong, text='Thời gian kết thúc của hợp đồng')
+    edt_TGKT = Entry(dkhopdong, width=50)
 
-def xemdanhsachdonhang():
-    xemdanhsachdonhang=Tk()
-    xemdanhsachdonhang.title("Danh sách đơn hàng của đối tác")
+    label_hoahong = Label(dkhopdong, text='Hoa hồng của hợp đồng')
+    edt_hoahong = Entry(dkhopdong, width=50)
 
-    label_madt = Label(xemdanhsachdonhang, text='Điền mã quý đối tác')
-    edt_madt = Entry(xemdanhsachdonhang, width=50)
+    label_TGBD.grid(row=0, column=0, padx=10, pady=10)
+    edt_TGBD.grid(row=0, column=1, padx=10, pady=10)
 
-    label_madt.grid(row=0, column=0, padx=10, pady=10)
-    edt_madt.grid(row=0, column=1, padx=10, pady=10)
+    label_TGKT.grid(row=1, column=0, padx=10, pady=10)
+    edt_TGKT.grid(row=1, column=1, padx=10, pady=10)
 
-    btnSave = Button(xemdanhsachdonhang, text="Xem danh sach don hang", command=lambda:danhsachdonhang(xemdanhsachdonhang))
-    btnSave.grid(row=1, column=1, padx=10, pady=10)
+    label_hoahong.grid(row=3, column=0, padx=10, pady=10)
+    edt_hoahong.grid(row=3, column=1, padx=10, pady=10)
+
+    btnSave = Button(dkhopdong, text="Đăng kí",
+                     command=lambda: giahanhopdongDB(edt_TGBD, edt_TGKT,
+                                                     edt_hoahong))
+    btnSave.grid(row=3, column=1, padx=10, pady=10)
+def dkhopdongDB(TGBD, TGKT, HOAHONG):
+    conn = AdminView.connectdb("", "")
+    cursor = conn.cursor()
+    cursor.execute("EXEC DANGKI_HOPDONG @MADT=?, @TGBD=?, @TGKT=?, @HOAHONG=?",loggedInID, TGBD.get(), TGKT.get(), HOAHONG.get())
+    conn.commit()
 def dkchinhanh():
     dkchinhanh=Tk()
     dkchinhanh.title("Đăng kí chi nhánh cho hợp đồng")
@@ -43,8 +70,13 @@ def dkchinhanh():
     label_diachi.grid(row=1, column=0, padx=10, pady=10)
     edt_diachi.grid(row=1, column=1, padx=10, pady=10)
 
-    btnSave=Button(dkchinhanh,text="Lưu chi nhánh")
+    btnSave=Button(dkchinhanh,text="Lưu chi nhánh", command=lambda :dkchinhanhDB(edt_mahd,edt_diachi))
     btnSave.grid(row=2, column=1, padx=10, pady=10)
+def dkchinhanhDB(mahd, diachi):
+    conn = AdminView.connectdb("", "")
+    cursor = conn.cursor()
+    cursor.execute("EXEC DANGKI_CHINHANH_HOPDONG @MAHD=?, @DIACHI=?", mahd.get(), diachi.get())
+    conn.commit()
 def giahanHopdong():
     giahanHopdong=Tk()
     giahanHopdong.title("Gia hạn hợp đồng")
@@ -67,69 +99,41 @@ def giahanHopdong():
     label_hoahong.grid(row=2, column=0, padx=10, pady=10)
     edt_hoahong.grid(row=2, column=1, padx=10, pady=10)
 
-    btnSave = Button(giahanHopdong, text="Lưu thông tin hợp đồng")
+    btnSave = Button(giahanHopdong, text="Lưu thông tin hợp đồng", command= lambda :giahanhopdongDB(edt_mahd, edt_thoigian,
+                                                                                                    edt_hoahong))
     btnSave.grid(row=3, column=1, padx=10, pady=10)
-def themSanPham():
-    themSanPham=Tk()
-    themSanPham.title("Thêm sản phẩm")
+def giahanhopdongDB(mahd, tgkt, hoahong):
+    conn = AdminView.connectdb("", "")
+    cursor = conn.cursor()
+    cursor.execute("EXEC GIAHAN_HOPDONG @MAHD=?, @TGKT=?, @HOAHONG=?, @ISACEPTED=1", mahd.get(), tgkt.get(), hoahong.get())
+    conn.commit()
 
-    label_malh = Label(themSanPham, text='Điền mã hợp đồng của quý đối tác')
-    edt_malh = Entry(themSanPham, width=50)
-
-    label_tensp = Label(themSanPham, text='Điền thời gian')
-    edt_tensp = Entry(themSanPham, width=50)
-
-
-    label_malh.grid(row=0, column=0, padx=10, pady=10)
-    edt_malh.grid(row=0, column=1, padx=10, pady=10)
-
-    label_tensp.grid(row=1, column=0, padx=10, pady=10)
-    edt_tensp.grid(row=1, column=1, padx=10, pady=10)
-
-    btnSave = Button(themSanPham, text="Lưu thông tin sản phẩm")
-    btnSave.grid(row=3, column=1, padx=10, pady=10)
-def suaSanPham():
-    suaSanPham=Tk()
-    suaSanPham.title("Sửa sản phẩm")
-
-    label_masp = Label(suaSanPham, text='Điền mã hợp đồng của quý đối tác')
-    edt_masp = Entry(suaSanPham, width=50)
-
-    label_malh = Label(suaSanPham, text='Điền mã hợp đồng của quý đối tác')
-    edt_malh = Entry(suaSanPham, width=50)
-
-    label_tensp = Label(suaSanPham, text='Điền thời gian')
-    edt_tensp = Entry(suaSanPham, width=50)
-
-    label_masp.grid(row=0, column=0, padx=10, pady=10)
-    edt_masp.grid(row=0, column=1, padx=10, pady=10)
-
-    label_malh.grid(row=1, column=0, padx=10, pady=10)
-    edt_malh.grid(row=1, column=1, padx=10, pady=10)
-
-    label_tensp.grid(row=2, column=0, padx=10, pady=10)
-    edt_tensp.grid(row=2, column=1, padx=10, pady=10)
-
-    btnSave = Button(suaSanPham, text="Lưu thông tin sản phẩm")
-    btnSave.grid(row=3, column=1, padx=10, pady=10)
 def doitacView():
     doitac=Tk()
+    doitac['bg'] = '#AC99F2'
     doitac.title("Chức năng cho đối tác")
-    #doitac.geometry("600x600")
-    btnDkChinhanh=Button(doitac, text="Đăng kí chi nhánh cho hợp đồng", font='Time 10', border=5, padx=10, pady=20,
+    doitac.geometry("600x600")
+    btnDkChinhanh=Button(doitac, text="Đăng kí chi nhánh cho hợp đồng", width=30, font='Time 10', border=5, padx=10, pady=20,
                          command=dkchinhanh)
-    btnGiahan = Button(doitac, text="Gia hạn hợp đồng", font='Time 10', border=5, padx=10, pady=20,
+    btnDkHopdong = Button(doitac, text="Đăng kí hợp đồng", width=30, font='Time 10', border=5, padx=10,
+                           pady=20,
+                           command=dkhopdong)
+    btnGiahan = Button(doitac, text="Gia hạn hợp đồng", width=30, font='Time 10', border=5, padx=10, pady=20,
                            command=giahanHopdong)
 
-    btnThemSP= Button(doitac, text="Thêm sản phẩm", font='Time 10', border=5, padx=10, pady=20,
-                           command=themSanPham)
-    btnSuaSP=Button(doitac, text="Sửa sản phẩm", font='Time 10', border=5, padx=10, pady=20,
-                           command=suaSanPham)
-    btnXemDanhSachDonHang = Button(doitac, text="Xem danh sách đơn hàng", font='Time 20 bold', border=10,
-                                   padx=20, pady=40, command=xemdanhsachdonhang)
-    btnXemDanhSachDonHang.pack(pady=10)
 
-    btnDkChinhanh.pack()
-    btnGiahan.pack()
-    btnThemSP.pack()
-    btnSuaSP.pack()
+    btnXemDanhSachDonHang = Button(doitac, text="Xem danh sách đơn hàng", width=30, font='Time 10', border=5, padx=10, pady=20,
+                                   command=danhsachdonhang)
+    btnXemDanhSachHopDong = Button(doitac, text="Xem danh sách hợp đồng", width=30, font='Time 10', border=5, padx=10,
+                                   pady=20,
+                                   command=danhsachhopdong)
+    btnXemDanhSachChiNhanh=Button(doitac, text="Xem danh sách chi nhánh", width=30, font='Time 10', border=5, padx=10, pady=20,
+                                   command=danhsachchinhanh)
+
+
+    btnXemDanhSachDonHang.grid(row=0, column=0, padx=10, pady=10)
+    btnDkChinhanh.grid(row=0, column=1, padx=10, pady=10)
+    btnGiahan.grid(row=1, column=0, padx=10, pady=10)
+    btnXemDanhSachHopDong.grid(row=1, column=1, padx=10, pady=10)
+    btnDkHopdong.grid(row=2, column=0, padx=10, pady=10)
+    btnXemDanhSachChiNhanh.grid(row=2, column=1, padx=10, pady=10)
