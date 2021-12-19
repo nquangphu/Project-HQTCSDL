@@ -1,9 +1,9 @@
 from tkinter import *
-from tkinter import font
 import AdminView
 import DoitacView
 import KhachHangView
 import TaixeView
+import NhanvienView
 from tkinter import messagebox
 
 def Login(username, password, conn):
@@ -13,6 +13,10 @@ def Login(username, password, conn):
     cursor.execute('select * from ONLINESHOP.dbo.TAIKHOAN where ISSUPERUSER=1 and USERNAME=? and PASS=?'
                          ,username.get(),password.get())
     admin=cursor.fetchall()
+
+    cursor.execute('select * from ONLINESHOP.dbo.TAIKHOAN where ISSTAFF=1 and USERNAME=? and PASS=?'
+                         ,username.get(),password.get())
+    staff=cursor.fetchall()
 
     cursor.execute('select DOITAC.MADT from ONLINESHOP.dbo.TAIKHOAN, ONLINESHOP.dbo.DOITAC where USERNAME=? AND PASS=? AND TAIKHOAN.MATK=DOITAC.MATK'
                    , username.get(), password.get())
@@ -25,11 +29,15 @@ def Login(username, password, conn):
     cursor.execute('select TAIXE.MATX from TAIKHOAN, TAIXE where USERNAME=? AND PASS=? AND TAIKHOAN.MATK=TAIXE.MATK'
                           , username.get(), password.get())
     taixe=cursor.fetchall()
+    
 
     success = 0
     if (len(admin)>0):
         success = 1
         AdminView.AdminView(conn)
+    if (len(staff)>0):
+        success = 1
+        NhanvienView.NhanvienView(conn)
     if (len(doitac)>0):
         success = 1
         DoitacView.loggedInID=doitac[0][0]

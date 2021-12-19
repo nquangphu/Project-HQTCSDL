@@ -7,7 +7,7 @@ def XemDanhSachDoiTac(conn):
     cursor = conn.cursor()
     cursor.execute("select MADT, TENDT, LOAIHANG.TENLH from DOITAC, LOAIHANG where DOITAC.MALH=LOAIHANG.MALH")
     records=cursor.fetchall()
-    AdminView.view(["MaDT", "TENDT","LOAIHANG"], records,"Danh sách đối tác")
+    AdminView.view(["Mã đối tác", "Tên đối tác","Loại mặt hàng"], records,"Danh sách đối tác")
     conn.commit()
 def XemDanhSachSanPham(conn):
     XemDanhSachSanPham = Tk()
@@ -23,7 +23,8 @@ def XemDanhSachSanPham(conn):
     label_madt.pack(side=LEFT)
     edt_madt.pack(side=RIGHT, padx=5)
 
-    btnSave = Button(XemDanhSachSanPham, width=10, bg='#F4FF89', text="Duyệt", command=lambda:DanhSachSanPham(edt_madt, conn))
+    btnSave = Button(XemDanhSachSanPham, width=10, bg='#F4FF89', text="Xem",
+        command=lambda:DanhSachSanPham(edt_madt, conn), activebackground='#4551FC', activeforeground='white')
     btnSave.pack(padx=10, pady=10)
 
 def DanhSachSanPham(madt, conn):
@@ -31,7 +32,7 @@ def DanhSachSanPham(madt, conn):
     cursor.execute("select SANPHAM.MASP, TENSP, GIASP, SLCUNGCAP from SANPHAM, QLSANPHAM where QLSANPHAM.MASP=SANPHAM.MASP AND QLSANPHAM.MADT=?", madt.get())
 
     records = cursor.fetchall()
-    AdminView.view(["MASP", "TENSP", "DONGIA", "SOLUONGTONKHO"], records, "Danh sách sản phẩm của đối tác")
+    AdminView.view(["Mã sản phẩm", "Tên sản phẩm", "Đơn giá", "Số lượng tồn kho"], records, "Danh sách sản phẩm của đối tác")
     conn.commit()
 def dathang(conn):
     dathang=Tk()
@@ -80,24 +81,23 @@ def dathang(conn):
     label_diachidh.pack(side=LEFT, padx=5)
     edt_diachigh.pack(side=RIGHT)
 
-    btnSave = Button(dathang, text="Đặt hàng", width=15, bg='#F4FF89',
+    btnSave = Button(dathang, text="Đặt hàng", width=15, bg='#F4FF89', activebackground='#4551FC', activeforeground='white',
                      command=lambda:dathangDB(edt_masp,edt_madt,edt_soluong,edt_httt,edt_diachigh, conn))
     btnSave.pack(pady=20)
 
 def dathangDB(masp, madt, soluong, httt, diachigh, conn):
-    #conn = AdminView.connectdb("", "")
+    
     cursor = conn.cursor()
     cursor.execute("Exec DATHANG ?, ?, ?, ?, ?, ?, ?",
                    loggedInID, masp.get(), madt.get(), soluong.get(), httt.get(), diachigh.get(), '10000')
     conn.commit()
 
 def XemDanhsachDonHang(conn):
-    #conn = AdminView.connectdb("", "")
     cursor = conn.cursor()
     cursor.execute("select MADH, NGAYTAO, DIACHIGH, TONGTIEN FROM DONHANG WHERE MAKH=?", loggedInID)
 
     records = cursor.fetchall()
-    AdminView.view(["MADH", "NGAYTAO", "DIACHIGH", "TONGTIEN"], records, "Danh sách đơn hàng")
+    AdminView.view(["Mã đơn hàng", "Ngày tạo", "Địa chỉ", "Tổng tiền"], records, "Danh sách đơn hàng")
     conn.commit()
 
 
@@ -109,15 +109,15 @@ def khachhangView(conn):
 
     fr1 = Frame(khachhang, bg='#AC99F2')
     btnXemDanhSachDoiTac = Button(fr1, text="Xem DS đối tác", width=30, height=3, border=2, bg='#FDFFB2', font='Time 11',
-                    command=lambda:XemDanhSachDoiTac(conn))
+                    command=lambda:XemDanhSachDoiTac(conn), activebackground='#4551FC', activeforeground='white')
     btnXemDanhSachSanPham= Button(fr1, text="Xem DS sản phẩm", width=30, height=3, border=2, bg='#FDFFB2', font='Time 11',
-                    command=lambda:XemDanhSachSanPham(conn))
+                    command=lambda:XemDanhSachSanPham(conn), activebackground='#4551FC', activeforeground='white')
     
     fr2 = Frame(khachhang, bg='#AC99F2')
     btnDathang = Button(fr2, text="Đặt hàng", width=30, height=3, border=2, bg='#FDFFB2', font='Time 11',
-                    command=lambda:dathang(conn))
+                    command=lambda:dathang(conn), activebackground='#4551FC', activeforeground='white')
     btnXemDanhSachDonHang = Button(fr2, text="Xem DS đơn hàng", width=30, height=3, border=2, bg='#FDFFB2', font='Time 11',
-                    command=lambda:XemDanhsachDonHang(conn))
+                    command=lambda:XemDanhsachDonHang(conn), activebackground='#4551FC', activeforeground='white')
 
     fr1.pack(padx=10,pady=20)
     fr2.pack(padx=10,pady=20)
