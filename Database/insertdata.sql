@@ -86,6 +86,8 @@ INSERT INTO TAIKHOAN(USERNAME, PASS, ISSTAFF, ISSUPERUSER, SDT, EMAIL, DIACHI, I
 VALUES('taixe4', 'taixe4', 0, 0, '0123456789', 'taixe4@gmail.com', N'326/5 Bui Minh Truc, phuong 6, quan 8, Thanh pho Ho Chi Minh', 1)
 INSERT INTO TAIKHOAN(USERNAME, PASS, ISSTAFF, ISSUPERUSER, SDT, EMAIL, DIACHI, ISACTIVE)
 VALUES('taixe5', 'taixe5', 0, 0, '0123456789', 'taixe5@gmail.com', N'80 Ly Thai To, phuong 6, quan 5, Thanh pho Ho Chi Minh', 1)
+INSERT INTO TAIKHOAN(USERNAME, PASS, ISSTAFF, ISSUPERUSER, SDT, EMAIL, DIACHI, ISACTIVE)
+VALUES('nhanvien1', 'nhanvien1', 1, 0, '0123456789', 'nhanvien1@gmail.com', N'80 Ly Thai To, phuong 6, quan 5, Thanh pho Ho Chi Minh', 1)
 GO
 
 INSERT INTO TAIXE(MATK, MAKV, CMND, DIACHI, BIENSO, STK, NGANHANG)
